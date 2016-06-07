@@ -7,24 +7,24 @@ import sys
 import os
 import sqlite3
 
-path  = '../Songs/' 
+path  = '../Songs/'
 
 def insert_in_database(database, f) :
     cursor = database.execute("SELECT name FROM SONGS WHERE name = (?)", (f,))
     data = cursor.fetchone()
     if data is None :
         database.execute("INSERT INTO SONGS VALUES (?);", (f,))
-        database.commit() # Can do a commit before closing too.
         return 1
     else :
         return 0
 
-def create_database(database,r) :
+def create_database(database, recreate) :
     database.execute('''CREATE TABLE IF NOT EXISTS SONGS (NAME TEXT NOT NULL);''')
-    if r :
+    if recreate :
         files = os.listdir(path)
         for f in files:
             insert_in_database(database, os.path.splitext(f)[0])
+            database.commit()
 
 def download_video(http, link, database) :
     status, response = http.request(link)
@@ -36,6 +36,7 @@ def download_video(http, link, database) :
         print("Downloading : " + curr_video_obj.filename)
         video = curr_video_obj.get('3gp', '144p')
         video.download(path + curr_video_obj.filename + '.mp4')
+        database.commit()
     else :
         print ("Already Exists : " + curr_video_obj.filename)
     soup = BeautifulSoup(response,"lxml")
@@ -83,10 +84,10 @@ def main() :
 
     http = httplib2.Http()
 
-    conn = sqlite3.connect('downloadedsongs.db')
-    create_database(conn,0)
+    db = sqlite3.connect('downloadedsongs.db')
+    create_database(db,0)
 
-    download_videos(http,link, conn, counter)
+    download_videos(http,link, db, counter)
 
     conn.close()
     print("Script finished")
