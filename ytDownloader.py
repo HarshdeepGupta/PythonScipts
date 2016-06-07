@@ -7,6 +7,8 @@ import sys
 import os
 import sqlite3
 
+path  = '../Songs/' 
+
 def insert_in_database(database, f) :
     cursor = database.execute("SELECT name FROM SONGS WHERE name = (?)", (f,))
     data = cursor.fetchone()
@@ -20,7 +22,7 @@ def insert_in_database(database, f) :
 def create_database(database,r) :
     database.execute('''CREATE TABLE IF NOT EXISTS SONGS (NAME TEXT NOT NULL);''')
     if r :
-        files = os.listdir("../Songs/")
+        files = os.listdir(path)
         for f in files:
             insert_in_database(database, os.path.splitext(f)[0])
 
@@ -33,7 +35,7 @@ def download_video(http, link, database) :
     if to_download :
         print("Downloading : " + curr_video_obj.filename)
         video = curr_video_obj.get('3gp', '144p')
-        video.download('../Songs/' + curr_video_obj.filename + '.mp4')
+        video.download(path + curr_video_obj.filename + '.mp4')
     else :
         print ("Already Exists : " + curr_video_obj.filename)
     soup = BeautifulSoup(response,"lxml")
@@ -69,10 +71,12 @@ def parse_input() :
 
     return link,counter
 
-
 def main() :
 
     link , counter = parse_input()
+
+    if not os.path.exists(path):
+        os.makedirs(path)
 
     print("Starting Video : " + link )
     print("Count : " + str(counter))
