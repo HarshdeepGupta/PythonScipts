@@ -5,8 +5,6 @@ import httplib2
 from bs4 import BeautifulSoup, SoupStrainer
 import sys
 
-    
-
 # yt = YouTube("http://www.youtube.com/watch?v=Ik-RsDGPI5Y")
 
 # # pprint(yt.get_videos())
@@ -53,7 +51,7 @@ while counter:
     div = soup.findAll('div', class_="autoplay-bar");      
     div = str(div);
     link_start_pos = div.find("href");
-    link ='https://www.youtube.com' +  div[link_start_pos+6 : link_start_pos+26];     
+    link ='https://www.youtube.com' +  div[link_start_pos+6 : link_start_pos+26];
     status, response = http.request(link)
     counter -= 1;
 
