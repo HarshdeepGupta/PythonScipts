@@ -89,7 +89,7 @@ def main() :
 
     download_videos(http,link, db, counter)
 
-    conn.close()
+    db.close()
     print("Script finished")
 
 main()
