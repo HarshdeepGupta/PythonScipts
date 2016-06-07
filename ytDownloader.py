@@ -7,7 +7,6 @@ import sys
 import os
 import sqlite3
 
-
 def insert_in_database(database, f) :
     cursor = database.execute("SELECT name FROM SONGS WHERE name = (?)", (f,))
     data = cursor.fetchone()
@@ -28,14 +27,15 @@ def create_database(database,r) :
 def download_video(http, link, database) :
     status, response = http.request(link)
     curr_video_obj = YouTube(link)
-    print("Downloading : " + curr_video_obj.filename);
 
     # Check if exits and add to database if it doesnt. Returns 1 if new video
     to_download  = insert_in_database(database, curr_video_obj.filename)
-    # if to_download :
-    #     video = curr_video_obj.get('mp4', '720p')
-    #     video.download(curr_video_obj.filename+'.mp4')
-
+    if to_download :
+        print("Downloading : " + curr_video_obj.filename)
+        video = curr_video_obj.get('3gp', '144p')
+        video.download('../Songs/' + curr_video_obj.filename + '.mp4')
+    else :
+        print ("Already Exists : " + curr_video_obj.filename)
     soup = BeautifulSoup(response,"lxml")
 
     # Select the div containg the link to the next video
@@ -46,29 +46,33 @@ def download_video(http, link, database) :
 
 def download_videos(http, link, database, counter) :
     while counter:
-        print(counter)
         link = download_video(http,link, database)
-        print(link)
-        counter -= 1;
+        counter -= 1
 
-
-def main() :
+def parse_input() :
     link = ""
-    counter = 0
-    if len(sys.argv) == 1:
+    counter_ = 0;
+    if len(sys.argv) == 1 :
         link = input("URL of the youtube video to start: ")
         counter_ = input("No. of Videos to download: ")
-    elif len(sys.argv) == 3:
+    elif len(sys.argv) == 3 :
         link = sys.argv[1]
         counter_ = sys.argv[2]
-    else:
+    else :
         raise ValueError("Incorrect initilization: Correct Usage is \n Either give no arguements or give link of the video followed by the no. of videos to download.")
         sys.exit()
 
-    try:
+    try :
        counter = int(counter_)
-    except ValueError:
+    except ValueError :
        print("Counter must be an integer")
+
+    return link,counter
+
+
+def main() :
+
+    link , counter = parse_input()
 
     print("Starting Video : " + link )
     print("Count : " + str(counter))
